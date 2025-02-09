@@ -2,7 +2,8 @@ flask==3.1.0
 flask-cors==4.0.0
 python-dotenv==1.0.0
 openai==1.61.1
-sounddevice==0.4.6
-numpy==1.26.4
-soundfile==0.12.1
 gunicorn==21.2.0
+# Comment out audio-related packages in production
+# sounddevice==0.4.6
+# numpy==1.26.4
+# soundfile==0.12.1

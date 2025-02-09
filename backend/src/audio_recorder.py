@@ -6,22 +6,24 @@ import numpy as np
 
 class AudioRecorder:
     def __init__(self, output_dir="recordings"):
-        # Query default input device
-        device_info = sd.query_devices(kind='input')
-        print(f"Using input device: {device_info['name']}")
-        
-        self.RATE = int(device_info['default_samplerate'])  # Use device's native rate
-        self.CHANNELS = min(device_info['max_input_channels'], 2)  # Use mono if stereo not available
+        self.is_production = os.getenv('FLASK_ENV') == 'production'
         self.output_dir = output_dir
-        self.is_recording = False
-        self.frames = []
         
-        # Create output directory if it doesn't exist
+        if not self.is_production:
+            # Only initialize audio device in development
+            device_info = sd.query_devices(kind='input')
+            print(f"Using input device: {device_info['name']}")
+            self.RATE = int(device_info['default_samplerate'])
+            self.CHANNELS = min(device_info['max_input_channels'], 2)
+        
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
             
     def start_recording(self):
-        """Start recording with professional-grade settings"""
+        if self.is_production:
+            print("Recording disabled in production")
+            return
+            
         self.is_recording = True
         self.frames = []
         
@@ -42,7 +44,11 @@ class AudioRecorder:
         print(f"Recording started... (Using {self.CHANNELS} channel{'s' if self.CHANNELS > 1 else ''} at {self.RATE}Hz)")
         
     def stop_recording(self):
-        """Stop recording and save the file"""
+        if self.is_production:
+            # In production, return a mock response
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            return f"mock_recording_{timestamp}.wav"
+            
         if hasattr(self, 'stream'):
             self.is_recording = False
             self.stream.stop()
