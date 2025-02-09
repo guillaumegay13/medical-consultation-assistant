@@ -34,7 +34,6 @@ def serve(path):
     except:
         return send_from_directory(app.static_folder, path)
 
-# Update API routes to use /api prefix
 @app.route('/api/record', methods=['POST'])
 def toggle_recording():
     try:
@@ -48,15 +47,10 @@ def toggle_recording():
         elif action == 'stop':
             audio_file = recorder.stop_recording()
             if audio_file:
-                if os.getenv('FLASK_ENV') == 'production':
-                    # In production, return mock transcript
-                    return jsonify({
-                        'status': 'success',
-                        'transcript': 'This is a mock transcript for production testing.\nMédecin: Comment allez-vous?\nPatient: Je vais bien, merci.'
-                    })
                 transcript = transcription_service.transcribe(audio_file)
                 if transcript:
                     return jsonify({'status': 'success', 'transcript': transcript})
+                return jsonify({'error': 'Transcription error'})
             return jsonify({'error': 'No audio file recorded'})
         
         return jsonify({'error': 'Invalid action'})
