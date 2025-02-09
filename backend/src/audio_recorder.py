@@ -1,8 +1,11 @@
-import sounddevice as sd
-import soundfile as sf
-from datetime import datetime
 import os
-import numpy as np
+from datetime import datetime
+
+# Only import audio-related libraries in development
+if os.getenv('FLASK_ENV') != 'production':
+    import sounddevice as sd
+    import numpy as np
+    import soundfile as sf
 
 class AudioRecorder:
     def __init__(self, output_dir="recordings"):
