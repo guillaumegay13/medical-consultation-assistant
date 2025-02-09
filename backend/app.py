@@ -6,16 +6,15 @@ import os
 from dotenv import load_dotenv
 
 # Initialize Flask with static files configuration
-app = Flask(__name__, static_folder='../frontend/build')
+app = Flask(__name__, static_folder='../frontend/build', static_url_path='')
 
 # Configure CORS based on environment
 if os.getenv('FLASK_ENV') == 'development':
-    CORS(app)
+    CORS(app, origins=['http://localhost:3000'])
 else:
-    # In production, only allow specific origins
     CORS(app, origins=[
-        'http://localhost:3000',
-        'https://your-frontend-domain.vercel.app'  # Add your Vercel domain here
+        os.getenv('VERCEL_URL'),
+        'http://localhost:3000'
     ])
 
 # Load environment variables
@@ -27,12 +26,14 @@ transcription_service = TranscriptionService(api_key=os.getenv('OPENAI_API_KEY')
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
+    print(f"Serving path: {path}")  # Debug print
     if path.startswith('api/'):
         return app.view_functions[path]()
-    try:
-        return send_from_directory(app.static_folder, 'index.html')
-    except:
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        print(f"Serving static file: {path}")  # Debug print
         return send_from_directory(app.static_folder, path)
+    print("Serving index.html")  # Debug print
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/api/record', methods=['POST'])
 def toggle_recording():
@@ -60,5 +61,5 @@ def toggle_recording():
         return jsonify({'error': f"Server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
+    port = int(os.getenv('PORT', 8000))
     app.run(host='0.0.0.0', port=port) 

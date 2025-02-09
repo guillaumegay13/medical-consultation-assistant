@@ -10,7 +10,7 @@ const App: React.FC = () => {
     const handleToggleRecording = async () => {
         try {
             const action = isRecording ? 'stop' : 'start';
-            const response = await fetch('/api/record', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/record`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -13,3 +13,5 @@ __pycache__/
 **/recordings/
 .DS_Store
 .env
+
+frontend/.env
